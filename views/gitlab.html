@@ -1,0 +1,36 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body>
+<form id="gitlab">
+    <label for="gitlablink">Git Link:</label>
+    <input type="url" name="gitlablink" id="gitlablink" />
+    <button type="submit" class="mod-primary">Save</button>
+</form>
+<script type="text/javascript">
+    var t = TrelloPowerUp.iframe();
+
+    document.getElementById("gitlab").addEventListener('submit', function(event){
+      // Stop the browser trying to submit the form itself.
+      event.preventDefault();
+      return t.set('card', 'shared', 'gitlablink',  document.getElementById('gitlablink').value)
+      .then(function(){
+        t.closePopup();
+      });
+    });
+
+
+    t.render(function(){
+      return t.get('card', 'shared', 'gitlablink')
+      .then(function(link){
+        document.getElementById('gitlablink').value = link || "";
+      })
+      .then(function(){
+        t.sizeTo('#gitlab').done();
+      });
+    });
+</script>
+</body>
+</html>

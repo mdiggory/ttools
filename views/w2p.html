@@ -1,0 +1,36 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body>
+<form id="w2p">
+    <label for="w2plink">W2P Link:</label>
+    <input type="url" name="w2plink" id="w2plink" />
+    <button type="submit" class="mod-primary">Save</button>
+</form>
+<script type="text/javascript">
+    var t = TrelloPowerUp.iframe();
+
+    document.getElementById("w2p").addEventListener('submit', function(event){
+      // Stop the browser trying to submit the form itself.
+      event.preventDefault();
+      return t.set('card', 'shared', 'w2plink',  document.getElementById('w2plink').value)
+      .then(function(){
+        t.closePopup();
+      });
+    });
+
+
+    t.render(function(){
+      return t.get('card', 'shared', 'w2plink')
+      .then(function(link){
+        document.getElementById('w2plink').value = link || "";
+      })
+      .then(function(){
+        t.sizeTo('#w2p').done();
+      });
+    });
+</script>
+</body>
+</html>
