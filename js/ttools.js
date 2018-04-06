@@ -9,26 +9,7 @@ var Promise = TrelloPowerUp.Promise;
 
 TrelloPowerUp.initialize({
   'card-buttons': function(t, options){
-    return [{
-      icon: W2P_ICON,
-      text: 'Add W2P link',
-      callback: function(t){
-              return t.popup({
-                title: "W2P Link",
-                url: 'views/w2p.html'
-              });
-            }
-    },
-    {
-          icon: GIT_ICON,
-          text: 'Add Git link',
-          callback: function(t){
-                  return t.popup({
-                    title: "Git Link",
-                    url: 'views/gitlab.html'
-                  });
-                }
-        }];
+    return getCardButtons(t);
   },
   'card-badges': function(t, options) {
     return getAllBadges(t, false);
@@ -51,16 +32,19 @@ function getAllBadges(t, long) {
             var daysSinceCreation = Math.round(Math.abs((today.getTime() - creation.getTime())/(24*60*60*1000)));
             var daysSinceUpdate = Math.round(Math.abs((today.getTime() - lastUpdate.getTime())/(24*60*60*1000)));
 
+            var threshold_creation = 60;
+            var threshold_update = 7;
+
             var badges = [{
-                  icon: daysSinceCreation < 60 ? CLOCK_ICON : CLOCK_ICON_WHITE,
+                  icon: daysSinceCreation < threshold_creation ? CLOCK_ICON : CLOCK_ICON_WHITE,
                   text: daysSinceCreation + (long ? " day" + (daysSinceCreation < 2 ? "" : "s") : ""),
-                  color: daysSinceCreation < 60 ? null : 'red',
+                  color: daysSinceCreation < threshold_creation ? null : 'red',
                   title: 'Open for'
                 },
                 {
-                  icon: daysSinceUpdate < 7 ? HOURGLASS_ICON : HOURGLASS_ICON_WHITE,
+                  icon: daysSinceUpdate < threshold_update ? HOURGLASS_ICON : HOURGLASS_ICON_WHITE,
                   text: daysSinceUpdate + (long ? " day" + (daysSinceUpdate < 2 ? "" : "s") : ""),
-                  color: daysSinceUpdate < 7 ? null : 'red',
+                  color: daysSinceUpdate < threshold_update ? null : 'red',
                   title: 'Inactive for'
                 }
             ];
@@ -90,4 +74,41 @@ function getAllBadges(t, long) {
             return badges;
 
         })
+}
+
+function getCardButtons(t) {
+    return t.getAll()
+        .then(function (data){
+            var w_label = "Add W2P link";
+            var g_label = "Add Git link";
+
+            if (data && data.card && data.card.shared && data.card.shared.w2plink && data.card.shared.w2plink != ""){
+                w_label = "Edit W2P link";
+            }
+            if (data && data.card && data.card.shared && data.card.shared.gitlablink && data.card.shared.gitlablink != ""){
+                g_label = "Edit Git link";
+            }
+
+            return [{
+                  icon: W2P_ICON,
+                  text: w_label,
+                  callback: function(t){
+                          return t.popup({
+                            title: "W2P Link",
+                            url: 'views/w2p.html'
+                          });
+                        }
+                },
+                {
+                  icon: GIT_ICON,
+                  text: g_label,
+                  callback: function(t){
+                          return t.popup({
+                            title: "Git Link",
+                            url: 'views/gitlab.html'
+                          });
+                        }
+                    }];
+        })
+    ;
 }
