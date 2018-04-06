@@ -8,22 +8,29 @@ var GIT_ICON = 'https://benoit-atmire.github.io/ttools/img/gitlab.png';
 var Promise = TrelloPowerUp.Promise;
 
 TrelloPowerUp.initialize({
-  'card-buttons': function(t, options){
+    'card-buttons': function(t, options){
     return getCardButtons(t);
-  },
-  'card-badges': function(t, options) {
+    },
+    'card-badges': function(t, options) {
     return getAllBadges(t, false);
-  },
-  'card-detail-badges': function(t, options) {
+    },
+    'card-detail-badges': function(t, options) {
     return getAllBadges(t, true);
-  }
+    },
+    'show-settings': function(t, options){
+      return t.popup({
+        title: 'Settings',
+        url: 'views/settings.html',
+        height: 184,
+        width: 600
+      });
+    }
 });
 
 function getAllBadges(t, long) {
 
-   return Promise.all([t.card('all'), t.getAll()])
+   return Promise.all([t.card('all'), t.getAll(), t.get('board', 'shared', 'settings', '')])
         .then(function (values) {
-
             var card = values[0];
 
             var today = new Date();
@@ -32,8 +39,16 @@ function getAllBadges(t, long) {
             var daysSinceCreation = Math.round(Math.abs((today.getTime() - creation.getTime())/(24*60*60*1000)));
             var daysSinceUpdate = Math.round(Math.abs((today.getTime() - lastUpdate.getTime())/(24*60*60*1000)));
 
+            // Defaults when no setting
+
             var threshold_creation = 60;
             var threshold_update = 7;
+
+            var settings = values[2];
+            var hasSettings = (settings != '' && settings.c_thresholds && settings.u_thresholds);
+
+            if (hasSettings && settings.c_thresholds[card.idList]) threshold_creation = settings.c_thresholds[card.idList];
+            if (hasSettings && settings.u_thresholds[card.idList]) threshold_update = settings.u_thresholds[card.idList];
 
             var badges = [{
                   icon: daysSinceCreation < threshold_creation ? CLOCK_ICON : CLOCK_ICON_WHITE,

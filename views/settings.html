@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+    <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body>
+
+<form id="settings">
+    <fieldset id="fields"></fieldset>
+    <button type="submit" class="mod-primary">Save</button>
+</form>
+
+<script>
+    var t = TrelloPowerUp.iframe();
+    var Promise = TrelloPowerUp.Promise;
+
+    document.getElementById("settings").addEventListener('submit', function(event){
+      event.preventDefault();
+      var c_thresholds = {};
+      var u_thresholds = {};
+
+      var c_fields = document.getElementsByClassName("c_field");
+      var u_fields = document.getElementsByClassName("u_field");
+      console.log(c_fields);
+      console.log(u_fields);
+
+      for (var i = 0 ; i < c_fields.length ; i++){
+        c_thresholds[c_fields[i].name] = c_fields[i].value;
+        console.log(c_fields[i].name + " --> " + c_fields[i].value);
+      }
+      for (var j = 0 ; j < u_fields.length ; j++){
+        u_thresholds[u_fields[j].name] = u_fields[j].value;
+        console.log(u_fields[j].name + " --> " + u_fields[j].value);
+      }
+
+      console.log(c_thresholds);
+      console.log(u_thresholds);
+
+      return t.set('board', 'shared', 'settings',  {"c_thresholds" : c_thresholds, "u_thresholds" : u_thresholds})
+      .then(function(){
+        t.closePopup();
+      });
+    });
+
+
+    t.render(function(){
+      return Promise.all([t.lists('id', 'name'),t.get('board', 'shared', 'settings', '')])
+      .then(function(values){
+
+        var html = "<table><tr><th>List</th><th>Threshold creation</th><th>Threshold update</th></tr>";
+        var lists = values[0];
+        console.log(JSON.stringify(lists));
+        var settings = values[1];
+        console.log(JSON.stringify(settings));
+
+        var hasSettings = (settings != '' && settings.c_thresholds && settings.u_thresholds);
+
+        for (var i = 0 ; i < lists.length ; i++) {
+
+            html += "<tr><td>" + lists[i].name + "</td>";
+            html += "<td><input name='"+lists[i].id+"' class='c_field' type='number' ";
+            html += (hasSettings && settings.c_thresholds[lists[i].id]) ? "value='" + settings.c_thresholds[lists[i].id] + "' " : "";
+            html += "</td><td><input name='"+lists[i].id+"' class='u_field' type='number' ";
+            html += (hasSettings && settings.u_thresholds[lists[i].id]) ? "value='" + settings.u_thresholds[lists[i].id] + "' " : "";
+            html += "/></td></tr>";
+        }
+
+        html += "</table>";
+
+        document.getElementById('fields').innerHTML = html;
+      })
+      .then(function(){
+        t.sizeTo('#settings').done();
+      });
+    });
+</script>
+</body>
+</html>
