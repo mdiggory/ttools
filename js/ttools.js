@@ -52,9 +52,9 @@ function getAllBadges(t, long) {
             var daysSinceUpdate = Math.round(Math.abs((today.getTime() - lastUpdate.getTime())/(24*60*60*1000)));
 
             var badges = [{
-                  icon: daysSinceCreation < 15 ? CLOCK_ICON : CLOCK_ICON_WHITE,
+                  icon: daysSinceCreation < 30 ? CLOCK_ICON : CLOCK_ICON_WHITE,
                   text: daysSinceCreation + (long ? " day" + (daysSinceCreation < 2 ? "" : "s") : ""),
-                  color: daysSinceCreation < 15 ? null : 'red',
+                  color: daysSinceCreation < 30 ? null : 'red',
                   title: 'Open for'
                 },
                 {
