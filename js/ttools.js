@@ -53,13 +53,13 @@ function getAllBadges(t, long) {
 
             var badges = [{
                   icon: daysSinceCreation < 15 ? CLOCK_ICON : CLOCK_ICON_WHITE,
-                  text: daysSinceCreation + " day" + (daysSinceCreation < 2 ? "" : "s"),
+                  text: daysSinceCreation + (long ? " day" + (daysSinceCreation < 2 ? "" : "s") : ""),
                   color: daysSinceCreation < 15 ? null : 'red',
                   title: 'Open for'
                 },
                 {
                   icon: daysSinceUpdate < 7 ? HOURGLASS_ICON : HOURGLASS_ICON_WHITE,
-                  text: daysSinceUpdate + " day" + (daysSinceUpdate < 2 ? "" : "s"),
+                  text: daysSinceUpdate + (long ? " day" + (daysSinceUpdate < 2 ? "" : "s") : ""),
                   color: daysSinceUpdate < 7 ? null : 'red',
                   title: 'Inactive for'
                 }
