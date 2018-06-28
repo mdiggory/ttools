@@ -7,6 +7,11 @@
 <body>
 
 <form id="settings">
+
+    <fieldset id="w2p">
+        <label for="username">W2P username: </label><input type="text" id="username" />
+        <label for="password">W2P password: </label><input type="password" id="password" />
+    </fieldset>
     <fieldset id="fields"></fieldset>
     <button type="submit" class="mod-primary">Save</button>
 </form>
@@ -34,10 +39,18 @@
         console.log(u_fields[j].name + " --> " + u_fields[j].value);
       }
 
+      var username = document.getElementById("username").value;
+      var password = document.getElementById("password").value;
+
+      var settings = {
+                "username" : username,
+                "password" : password
+      };
+
       console.log(c_thresholds);
       console.log(u_thresholds);
 
-      return t.set('board', 'shared', 'settings',  {"c_thresholds" : c_thresholds, "u_thresholds" : u_thresholds})
+      return Promise.all([t.set('board', 'shared', 'settings',  {"c_thresholds" : c_thresholds, "u_thresholds" : u_thresholds}),t.set('board', 'private', 'settings',  settings)])
       .then(function(){
         t.closePopup();
       });
@@ -45,7 +58,7 @@
 
 
     t.render(function(){
-      return Promise.all([t.lists('id', 'name'),t.get('board', 'shared', 'settings', '')])
+      return Promise.all([t.lists('id', 'name'),t.get('board', 'shared', 'settings', ''),t.get('board', 'private', 'settings', '')])
       .then(function(values){
 
         var html = "<table><tr><th>List</th><th>Threshold creation</th><th>Threshold update</th></tr>";
@@ -69,6 +82,13 @@
         html += "</table>";
 
         document.getElementById('fields').innerHTML = html;
+
+        var hasW2PSettings = (values[2] != '' && values[2].username && values[2].password);
+
+        if (hasW2PSettings) {
+            document.getElementById("username").value = values[2].username;
+            document.getElementById("password").value = values[2].password;
+        }
       })
       .then(function(){
         t.sizeTo('#settings').done();
