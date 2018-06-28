@@ -4,7 +4,7 @@ var CLOCK_ICON_WHITE = 'https://benoit-atmire.github.io/ttools/img/clock_white.p
 var HOURGLASS_ICON_WHITE = 'https://benoit-atmire.github.io/ttools/img/hourglass_white.png';
 var W2P_ICON = 'https://benoit-atmire.github.io/ttools/img/w2p.png';
 var GIT_ICON = 'https://benoit-atmire.github.io/ttools/img/gitlab.png';
-var MONEY_ICON = 'https://benoit-atmire.github.io/ttoolsv/img/money.svg';
+var MONEY_ICON = 'https://benoit-atmire.github.io/ttools/img/money.svg';
 
 var Promise = TrelloPowerUp.Promise;
 
