@@ -156,7 +156,7 @@ function getCardButtons(t) {
 }
 
 function getCreditsSpent(w2plink, username, password){
-    if (!w2plink || w2plink == "") return 0;
+    if (!w2plink || w2plink == "" || !username || username == "" || !password || password == "") return 0;
 
     var taskId = getParams(w2plink).task_id;
 
