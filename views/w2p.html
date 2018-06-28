@@ -5,9 +5,24 @@
 </head>
 <body>
 <form id="w2p">
-    <label for="w2plink">W2P Link:</label>
-    <input type="url" name="w2plink" id="w2plink" />
-    <button type="submit" class="mod-primary">Save</button>
+
+    <fieldset id="link">
+        <label for="w2plink">W2P Link:</label>
+        <input type="url" name="w2plink" id="w2plink" />
+    </fieldset>
+
+    <fieldset id="new" style="display: none;">
+        <label for="projects">Project:</label>
+        <input type="text" list="projects_list" name="projects" id="projects"/>
+        <datalist id="projects_list"></datalist>
+
+        <input type="hidden" id="cardname" />
+
+        <button id="addnew">Create new</button>
+    </fieldset>
+
+    <button id="save" type="submit" class="mod-primary">Save</button>
+
 </form>
 <script type="text/javascript">
     var t = TrelloPowerUp.iframe();
@@ -21,16 +36,141 @@
       });
     });
 
+    document.getElementById("addnew").addEventListener('click', function(event){
+      // Stop the browser trying to submit the form itself.
+      event.preventDefault();
+
+      // Hide fieldset to prevent double submission + disable save button
+      document.getElementById('new').style.display = "none";
+      document.getElementById('save').disabled = true;
+
+      // Create new task, return url in w2plink field & re-enable button once done
+
+      return t.get('board', 'private', 'settings')
+      .then (function(settings){
+            // Create a new XMLHttpRequest.
+            var request = new XMLHttpRequest();
+
+            // Handle state changes for the request.
+            request.onreadystatechange = function(response) {
+              if (request.readyState === 4) {
+                if (request.status === 200) {
+                  var response = JSON.parse(request.responseText);
+                  var taskurl = "https://web2project.atmire.com/web2project/index.php?m=tasks&a=view&task_id=" + response.task_id;
+                  document.getElementById('w2plink').value = taskurl;
+                  document.getElementById('save').disabled = false;
+                }
+              }
+            };
+
+          var project = document.getElementById('projects').value;
+          var options = document.querySelectorAll('#projects_list option');
+          var result = {};
+
+          for (var i = 0 ; i < options.length ; i++){
+            if (options[i].value == project){
+                result.pm = options[i].getAttribute('pm');
+                result.tl = options[i].getAttribute('tl');
+                result.pid = options[i].getAttribute('pid');
+              break;
+            }
+          }
+
+
+            var data = {
+                "username": settings.username,
+                 "password": settings.password,
+                 "task_name" : document.getElementById('cardname').value,
+                 "task_owner" : result.pm,
+                 "task_description": "Trello-generated. Please create relevant subtasks for the corresponding ticket and assign them to the relevant person.",
+                 "task_dynamic" : 1,
+                 "dept_ids" : "array(1)"
+            };
+
+            if (result.tl != null && result.tl > -1) {
+                 data.hassign = result.tl;
+                 data.hperc_assign = result.tl + "=100";
+            }
+
+            var url = 'https://atmire.com/w2p-api/project/' + result.pid + '/tasks?';
+
+            for (var field in data){
+                url += field + "=" + data[field] + "&";
+            }
+
+            url += "task_priority=0";
+
+            // Set up and make the request.
+            request.open('POST', url, true);
+            //request.setRequestHeader("Content-Type", "application/json");
+            request.send(JSON.stringify(data));
+            //request.send();
+      });
+
+    });
+
 
     t.render(function(){
       return t.get('card', 'shared', 'w2plink')
       .then(function(link){
         document.getElementById('w2plink').value = link || "";
+        if (document.getElementById('w2plink').value == ""){
+          document.getElementById('new').style.display = "block";
+        }
+        return t.card('all')
+      })
+      .then(function(carddata){
+         document.getElementById('cardname').value = carddata.name;
+         return t.get('board', 'private', 'settings');
+      })
+      .then(function(settings){
+          if (settings && settings.username && settings.username != "" && settings.password && settings.password != ""){
+            loadProjects(settings.username, settings.password);
+          }
+
+          else {
+            document.getElementById('new').style.display = "none";
+          }
       })
       .then(function(){
         t.sizeTo('#w2p').done();
       });
     });
+
+
+
+
+    function loadProjects(username, password) {
+
+      var url = "https://atmire.com/w2p-api/reports?username=" + username + "&password=" + password + "&report_type=projects_overview&type=SLA";
+
+      var request = new XMLHttpRequest();
+      var dataList = document.getElementById('projects_list');
+
+            // Handle state changes for the request.
+      request.onreadystatechange = function(response) {
+        if (request.readyState === 4) {
+          if (request.status === 200) {
+            var response = JSON.parse(request.responseText);
+            console.log(response);
+            for (var i in response.projects){
+              var option = document.createElement('option');
+              option.value = response.projects[i].project_name + " (" +  response.projects[i].company_name + ")";
+              option.setAttribute("pid", response.projects[i].project_id);
+              option.setAttribute("pm", response.projects[i].pm_id);
+              option.setAttribute("tl", response.projects[i].tl_id);
+              dataList.appendChild(option);
+              //console.log(response.projects[i].project_name + " (" +  response.projects[i].company_name + ")::" + response.projects[i].project_id);
+            }
+
+
+          }
+        }
+      };
+
+      request.open('GET', url, true);
+      request.send();
+    }
 </script>
 </body>
 </html>

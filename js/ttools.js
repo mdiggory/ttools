@@ -4,6 +4,7 @@ var CLOCK_ICON_WHITE = 'https://benoit-atmire.github.io/ttools/img/clock_white.p
 var HOURGLASS_ICON_WHITE = 'https://benoit-atmire.github.io/ttools/img/hourglass_white.png';
 var W2P_ICON = 'https://benoit-atmire.github.io/ttools/img/w2p.png';
 var GIT_ICON = 'https://benoit-atmire.github.io/ttools/img/gitlab.png';
+var MONEY_ICON = 'https://benoit-atmire.github.io/ttoolsv/img/money.svg';
 
 var Promise = TrelloPowerUp.Promise;
 
@@ -29,7 +30,20 @@ TrelloPowerUp.initialize({
 
 function getAllBadges(t, long) {
 
-   return Promise.all([t.card('all'), t.getAll(), t.get('board', 'shared', 'settings', '')])
+   return t.getAll()
+        .then(function(pluginData){
+
+            //console.log(pluginData);
+
+            var w2plink = "";
+            var W2Psettings = {};
+
+            if (pluginData && pluginData.card && pluginData.card.shared) var w2plink = pluginData.card.shared.w2plink || "";
+            if (pluginData && pluginData.board && pluginData.board.private) var W2Psettings = pluginData.board.private.settings;
+
+
+            return Promise.all([t.card('all'), getCreditsSpent(w2plink, W2Psettings.username, W2Psettings.password), t.getAll()]);
+        })
         .then(function (values) {
             var card = values[0];
 
@@ -44,11 +58,14 @@ function getAllBadges(t, long) {
             var threshold_creation = 60;
             var threshold_update = 7;
 
-            var settings = values[2];
+            var settings = values[2].board.shared.settings;
             var hasSettings = (settings != '' && settings.c_thresholds && settings.u_thresholds);
 
             if (hasSettings && settings.c_thresholds[card.idList]) threshold_creation = settings.c_thresholds[card.idList];
             if (hasSettings && settings.u_thresholds[card.idList]) threshold_update = settings.u_thresholds[card.idList];
+
+            var W2Psettings = values[2].board.private.settings;
+            var hasW2PSettings = (W2Psettings != '' && W2Psettings.username && W2Psettings.password);
 
             var badges = [{
                   icon: daysSinceCreation < threshold_creation ? CLOCK_ICON : CLOCK_ICON_WHITE,
@@ -64,9 +81,9 @@ function getAllBadges(t, long) {
                 }
             ];
 
-            if (values[1] && values[1].card && values[1].card.shared) {
-                var w2plink = values[1].card.shared.w2plink || "";
-                var gitlablink = values[1].card.shared.gitlablink || "";
+            if (values[2] && values[2].card && values[2].card.shared) {
+                var w2plink = values[2].card.shared.w2plink || "";
+                var gitlablink = values[2].card.shared.gitlablink || "";
 
                 if (w2plink && w2plink != "") {
                     badges.push({
@@ -75,6 +92,16 @@ function getAllBadges(t, long) {
                         url: w2plink,
                         title: 'Task / Project'
                     });
+
+                    // If W2P credentials are known
+
+                    if (hasW2PSettings){
+                        badges.push({
+                            icon: MONEY_ICON,
+                            text: values[1] || 0,
+                            title: 'Credits'
+                        });
+                    }
                 }
 
                 if (gitlablink && gitlablink != "") {
@@ -127,3 +154,45 @@ function getCardButtons(t) {
         })
     ;
 }
+
+function getCreditsSpent(w2plink, username, password){
+    if (!w2plink || w2plink == "") return 0;
+
+    var taskId = getParams(w2plink).task_id;
+
+    return new Promise(function (resolve, reject) {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "https://atmire.com/w2p-api/project/x/task/" + taskId + "?username=" + username + "&password=" + password);
+        xmlhttp.onload = function () {
+          if (this.status >= 200 && this.status < 300) {
+            var response = JSON.parse(xmlhttp.responseText);
+            var time = response.task.task_hours_worked;
+
+            var credits = Math.ceil(time * 4);
+
+            resolve(credits);
+
+          } else {
+            resolve(0);
+          }
+        };
+        xmlhttp.onerror = function () {
+          resolve(0);
+        }
+        xmlhttp.send();
+    });
+}
+
+
+var getParams = function (url) {
+	var params = {};
+	var parser = document.createElement('a');
+	parser.href = url;
+	var query = parser.search.substring(1);
+	var vars = query.split('&');
+	for (var i = 0; i < vars.length; i++) {
+		var pair = vars[i].split('=');
+		params[pair[0]] = decodeURIComponent(pair[1]);
+	}
+	return params;
+};
