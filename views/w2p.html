@@ -54,7 +54,7 @@
             // Handle state changes for the request.
             request.onreadystatechange = function(response) {
               if (request.readyState === 4) {
-                if (request.status === 200) {
+                if (request.status === 201) {
                   var response = JSON.parse(request.responseText);
                   var taskurl = "https://web2project.atmire.com/web2project/index.php?m=tasks&a=view&task_id=" + response.task_id;
                   document.getElementById('w2plink').value = taskurl;
