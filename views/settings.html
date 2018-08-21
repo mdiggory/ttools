@@ -47,10 +47,13 @@
                 "password" : password
       };
 
+      settings.c_thresholds = c_thresholds;
+      settings.u_thresholds = u_thresholds;
+
       console.log(c_thresholds);
       console.log(u_thresholds);
 
-      return Promise.all([t.set('board', 'shared', 'settings',  {"c_thresholds" : c_thresholds, "u_thresholds" : u_thresholds}),t.set('board', 'private', 'settings',  settings)])
+      return t.set('board', 'shared', 'settings', settings)
       .then(function(){
         t.closePopup();
       });
@@ -58,7 +61,7 @@
 
 
     t.render(function(){
-      return Promise.all([t.lists('id', 'name'),t.get('board', 'shared', 'settings', ''),t.get('board', 'private', 'settings', '')])
+      return Promise.all([t.lists('id', 'name'),t.get('board', 'shared', 'settings', '')])
       .then(function(values){
 
         var html = "<table><tr><th>List</th><th>Threshold creation</th><th>Threshold update</th></tr>";
@@ -83,11 +86,11 @@
 
         document.getElementById('fields').innerHTML = html;
 
-        var hasW2PSettings = (values[2] != '' && values[2].username && values[2].password);
+        var hasW2PSettings = (settings != '' && settings.username && settings.password);
 
         if (hasW2PSettings) {
-            document.getElementById("username").value = values[2].username;
-            document.getElementById("password").value = values[2].password;
+            document.getElementById("username").value = settings.username;
+            document.getElementById("password").value = settings.password;
         }
       })
       .then(function(){

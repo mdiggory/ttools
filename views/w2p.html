@@ -17,6 +17,7 @@
         <datalist id="projects_list"></datalist>
 
         <input type="hidden" id="cardname" />
+        <input type="hidden" id="cardlink" />
 
         <button id="addnew">Create new</button>
     </fieldset>
@@ -46,7 +47,7 @@
 
       // Create new task, return url in w2plink field & re-enable button once done
 
-      return t.get('board', 'private', 'settings')
+      return t.get('board', 'shared', 'settings')
       .then (function(settings){
             // Create a new XMLHttpRequest.
             var request = new XMLHttpRequest();
@@ -54,8 +55,9 @@
             // Handle state changes for the request.
             request.onreadystatechange = function(response) {
               if (request.readyState === 4) {
-                if (request.status === 200) {
+                if (request.status === 201) {
                   var response = JSON.parse(request.responseText);
+                  console.log(response);
                   var taskurl = "https://web2project.atmire.com/web2project/index.php?m=tasks&a=view&task_id=" + response.task_id;
                   document.getElementById('w2plink').value = taskurl;
                   document.getElementById('save').disabled = false;
@@ -82,7 +84,7 @@
                  "password": settings.password,
                  "task_name" : document.getElementById('cardname').value,
                  "task_owner" : result.pm,
-                 "task_description": "Trello-generated. Please create relevant subtasks for the corresponding ticket and assign them to the relevant person.",
+                 "task_description": "Trello-generated. Please create relevant subtasks for the corresponding ticket and assign them to the relevant person.\nSee "+ document.getElementById('cardlink').value + " for details.",
                  "task_dynamic" : 1,
                  "dept_ids" : "array(1)"
             };
@@ -121,7 +123,8 @@
       })
       .then(function(carddata){
          document.getElementById('cardname').value = carddata.name;
-         return t.get('board', 'private', 'settings');
+         document.getElementById('cardlink').value = carddata.url;
+         return t.get('board', 'shared', 'settings');
       })
       .then(function(settings){
           if (settings && settings.username && settings.username != "" && settings.password && settings.password != ""){
