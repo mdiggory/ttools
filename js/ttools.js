@@ -1,10 +1,10 @@
-var CLOCK_ICON = 'https://benoit-atmire.github.io/ttools/img/clock.png';
-var HOURGLASS_ICON = 'https://benoit-atmire.github.io/ttools/img/hourglass.png';
-var CLOCK_ICON_WHITE = 'https://benoit-atmire.github.io/ttools/img/clock_white.png';
-var HOURGLASS_ICON_WHITE = 'https://benoit-atmire.github.io/ttools/img/hourglass_white.png';
-var W2P_ICON = 'https://benoit-atmire.github.io/ttools/img/w2p.png';
-var GIT_ICON = 'https://benoit-atmire.github.io/ttools/img/gitlab.png';
-var MONEY_ICON = 'https://benoit-atmire.github.io/ttools/img/money.svg';
+var CLOCK_ICON = '/ttools/img/clock.png';
+var HOURGLASS_ICON = '/ttools/img/hourglass.png';
+var CLOCK_ICON_WHITE = '/ttools/img/clock_white.png';
+var HOURGLASS_ICON_WHITE = '/ttools/img/hourglass_white.png';
+var W2P_ICON = '/ttools/img/w2p.png';
+var GIT_ICON = '/ttools/img/gitlab.png';
+var MONEY_ICON = '/ttools/img/money.svg';
 
 var Promise = TrelloPowerUp.Promise;
 
