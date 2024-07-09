@@ -162,7 +162,7 @@ function getCreditsSpent(w2plink, username, password){
 
     return new Promise(function (resolve, reject) {
         var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET", "https://atmire.com/w2p-api/project/x/task/" + taskId + "?username=" + username + "&password=" + password);
+        xmlhttp.open("GET", "https://web2project.atmire.com/w2p-api/project/x/task/" + taskId + "?username=" + username + "&password=" + password);
         xmlhttp.onload = function () {
           if (this.status >= 200 && this.status < 300) {
             var response = JSON.parse(xmlhttp.responseText);
